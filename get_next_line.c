@@ -6,17 +6,24 @@
 /*   By: bkael <marvin@42.fr>                       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/05/17 07:54:18 by bkael             #+#    #+#             */
-/*   Updated: 2021/05/17 07:55:01 by bkael            ###   ########.fr       */
+/*   Updated: 2021/05/21 17:33:14 by bkael            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-static void	ft_create_other(char **other)
+static int	ft_create_other(char **other, char *buf)
 {
-	**other = '\0';
-	(*other)++;
-	*other = ft_strdup(*other);
+	*other = ft_strchr(buf, '\n');
+	if (*other)
+	{
+		**other = '\0';
+		(*other)++;
+		*other = ft_strdup(*other);
+		if (!*other)
+			return (-1);
+	}
+	return (0);
 }
 
 static int	ft_check_byte(int byte)
@@ -25,8 +32,7 @@ static int	ft_check_byte(int byte)
 		return (0);
 	if (byte < 0)
 		return (-1);
-	else
-		return (1);
+	return (1);
 }
 
 static int	ft_create_line(int fd, char **line, char **other)
@@ -36,16 +42,17 @@ static int	ft_create_line(int fd, char **line, char **other)
 	char	*tmp;
 
 	byte = read(fd, buf, BUFFER_SIZE);
+	if (byte < 0)
+		return (-1);
+	if (!*line)
+		*line = ft_strdup("");
+	if (!*line)
+		return (-1);
 	while (!*other && byte > 0)
 	{
 		buf[byte] = '\0';
-		*other = ft_strchr(buf, '\n');
-		if (*other)
-		{
-			ft_create_other(other);
-			if (!*other)
-				return (-1);
-		}
+		if (ft_create_other(other, buf) == -1)
+			return (-1);
 		tmp = *line;
 		*line = ft_strjoin(*line, buf);
 		free(tmp);
@@ -59,15 +66,12 @@ static int	ft_create_line(int fd, char **line, char **other)
 
 static int	ft_copy_other(int fd, char **line, char **other)
 {
-	char	*tmp;
 	char	*next;
 
 	next = ft_strchr(*other, '\n');
-	tmp = *line;
 	if (!next)
 	{
 		*line = ft_strdup(*other);
-		free(tmp);
 		if (!*line)
 			return (-1);
 		free(*other);
@@ -78,7 +82,6 @@ static int	ft_copy_other(int fd, char **line, char **other)
 	{
 		*next++ = '\0';
 		*line = ft_strdup(*other);
-		free(tmp);
 		if (!*line)
 			return (-1);
 		*other = ft_strcpy(*other, next);
@@ -94,9 +97,6 @@ int	get_next_line(int fd, char **line)
 		return (-1);
 	if (*line)
 		free(*line);
-	*line = ft_strdup("");
-	if (!*line)
-		return (-1);
 	if (!other)
 		return (ft_create_line(fd, line, &other));
 	else
