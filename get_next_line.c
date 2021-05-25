@@ -97,6 +97,7 @@ int	get_next_line(int fd, char **line)
 		return (-1);
 	if (*line)
 		free(*line);
+	*line = NULL;
 	if (!other)
 		return (ft_create_line(fd, line, &other));
 	else
