@@ -35,19 +35,18 @@ static int	ft_check_byte(int byte)
 	return (1);
 }
 
-static int	ft_create_line(int fd, char **line, char **other)
+static int	ft_create_line(int fd, char **line, char **other, char *buf)
 {
 	int		byte;
-	char	buf[BUFFER_SIZE + 1];
 	char	*tmp;
 
 	byte = read(fd, buf, BUFFER_SIZE);
-	if (byte < 0)
-		return (-1);
-	if (!*line)
+	if (!*line && byte >= 0)
+	{
 		*line = ft_strdup("");
-	if (!*line)
-		return (-1);
+		if (!*line)
+			return (-1);
+	}
 	while (!*other && byte > 0)
 	{
 		buf[byte] = '\0';
@@ -61,10 +60,11 @@ static int	ft_create_line(int fd, char **line, char **other)
 		if (!*other)
 			byte = read(fd, buf, BUFFER_SIZE);
 	}
+	free(buf);
 	return (ft_check_byte(byte));
 }
 
-static int	ft_copy_other(int fd, char **line, char **other)
+static int	ft_copy_other(int fd, char **line, char **other, char *buf)
 {
 	char	*next;
 
@@ -76,7 +76,7 @@ static int	ft_copy_other(int fd, char **line, char **other)
 			return (-1);
 		free(*other);
 		*other = NULL;
-		return (ft_create_line(fd, line, other));
+		return (ft_create_line(fd, line, other, buf));
 	}
 	else
 	{
@@ -85,6 +85,7 @@ static int	ft_copy_other(int fd, char **line, char **other)
 		if (!*line)
 			return (-1);
 		*other = ft_strcpy(*other, next);
+		free(buf);
 		return (1);
 	}
 }
@@ -92,14 +93,16 @@ static int	ft_copy_other(int fd, char **line, char **other)
 int	get_next_line(int fd, char **line)
 {
 	static char	*other;
+	char		*buf;
 
 	if (fd < 0 || BUFFER_SIZE <= 0 || !line)
 		return (-1);
-	if (*line)
-		free(*line);
+	buf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (!buf)
+		return (-1);
 	*line = NULL;
 	if (!other)
-		return (ft_create_line(fd, line, &other));
+		return (ft_create_line(fd, line, &other, buf));
 	else
-		return (ft_copy_other(fd, line, &other));
+		return (ft_copy_other(fd, line, &other, buf));
 }
