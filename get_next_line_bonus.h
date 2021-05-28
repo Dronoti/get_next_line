@@ -21,6 +21,10 @@
 #  define BUFFER_SIZE 32
 # endif
 
+# ifndef FD_MAX
+#  define FD_MAX 2000
+# endif
+
 int		get_next_line(int fd, char **line);
 char	*ft_strjoin(char const *s1, char const *s2);
 size_t	ft_strlen(const char *s);
