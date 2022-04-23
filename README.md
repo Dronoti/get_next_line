@@ -32,7 +32,7 @@ git clone https://github.com/Dronoti/get_next_line.git get_next_line
 ```C
 #include "get_next_line.h"
 ```
-и добавить файл `get_next_line.с` при компиляции проекта
+и добавить файлы `get_next_line.с` и `get_next_line_utils.с` при компиляции проекта
 
 ### Дополнительно
 Подробное описание функции, ограничения и требования к ее реализации представлены в [задании.](./get_next_line.pdf)
